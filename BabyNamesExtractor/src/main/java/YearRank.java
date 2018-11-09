@@ -1,7 +1,6 @@
 import java.security.cert.Extension;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletionException;
 
 public class YearRank {
     private String year;
@@ -26,7 +25,7 @@ public class YearRank {
     }
 
     public void add(BabyName babyName) {
-        if(babyNameHashMap.get(babyName.getName()) == null || Integer.parseInt( babyNameHashMap.get(babyName.getName()).getRank()) < Integer.parseInt(babyName.getRank())) {
+        if (babyNameHashMap.get(babyName.getName()) == null || Integer.parseInt(babyNameHashMap.get(babyName.getName()).getRank()) < Integer.parseInt(babyName.getRank())) {
             babyNameHashMap.put(babyName.getName(), babyName);
         }
     }
@@ -35,15 +34,28 @@ public class YearRank {
         return babyNameHashMap.get(babyName);
     }
 
+    public ArrayList<BabyName> getSortedBabynames() {
+        ArrayList<BabyName> list = new ArrayList<BabyName>();
+        for (Map.Entry<String, BabyName> entry : babyNameHashMap.entrySet()) {
+            BabyName babyName = entry.getValue();
+            list.add(babyName);
+        }
+
+        Collections.sort(list, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+        return list;
+    }
+
+
     public String print() {
         StringBuilder sb = new StringBuilder();
         sb.append("\n" + this.getYear() + " ------------");
-        for (Map.Entry<String, BabyName> entry : babyNameHashMap.entrySet()) {
-            BabyName babyName = entry.getValue();
+        for (BabyName babyName: this.getSortedBabynames()) {
             sb.append("\n" + babyName.getName() + " - " + babyName.getRank());
         }
         return sb.toString();
     }
+
+
     public YearRank loadFromFile(String path) {
         this.path = path;
         // load the file
@@ -52,13 +64,14 @@ public class YearRank {
         this.year = Extractor.extractYear(lines);
         // extract the names from the file
         ArrayList<BabyName> babyNames = Extractor.extractNames(lines);
-        for (BabyName babyName:babyNames) {
+        for (BabyName babyName : babyNames) {
             this.add(babyName);
         }
         return this;
     }
+
     public YearRank saveSummary() {
-        if(this.getYear() != null && this.babyNameHashMap.size() > 0) {
+        if (this.getYear() != null && this.babyNameHashMap.size() > 0) {
             FileHelper.writeToFile(this.path + ".summary", this.print());
         }
         return this;
@@ -67,8 +80,8 @@ public class YearRank {
     // static methods
     public static void generateSummary(String path) {
         String[] filesPathList = FileHelper.getFilesList(path);
-        for (String filePath :filesPathList) {
-            if(filePath.contains(".html")) {
+        for (String filePath : filesPathList) {
+            if (filePath.contains(".html")) {
                 new YearRank().loadFromFile(filePath).saveSummary();
             }
         }

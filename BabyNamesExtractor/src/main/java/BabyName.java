@@ -1,5 +1,8 @@
-public class BabyName {
-    public enum Gender { Male, Female }
+public class BabyName implements Comparable<BabyName> {
+
+
+    public enum Gender {Male, Female}
+
     private String rank;
     private String name;
     private Gender gender;
@@ -12,6 +15,11 @@ public class BabyName {
         this.setRank(rank);
         this.setName(name);
         this.setGender(gender);
+    }
+
+    @Override
+    public int compareTo(BabyName o) {
+        return this.getName().compareTo(o.getName());
     }
 
 
